@@ -9,6 +9,10 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	Town[] townArray;
 	int[][] edgeArray;
 	
+	//Distance[i] will hold the shortest distance to townArray[i] 
+	//after calling Dijkstra's Algorithm
+	int[] distance;
+	
 	/**
 	 * Default constructor. Creates an empty graph with no content
 	 */
@@ -309,9 +313,15 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		
 		//Start from destination vertex and work backward to build the path
 		ArrayList<Town> backtrace = new ArrayList<>();
-		backtrace.add(destinationVertex);
+		//backtrace.add(destinationVertex); TODO: delete if this works
 		
-		Town previous = destinationVertex.getLastTown();
+		//Replace the argument destinationVertex with the actual one from the graph
+		//and add the destination to the graph
+		Town dV = getVertex(destinationVertex);
+		backtrace.add(dV);
+		
+		//Retrieve the graph's destination vertex matching the argument destination vertex
+		Town previous = dV.getLastTown();
 		
 		while (previous != null) {
 			backtrace.add(previous);
@@ -349,9 +359,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		//Generate sets to hold added and unadded Towns
 		ArrayList<Town> added = new ArrayList<>();
 		ArrayList<Town> unadded = new ArrayList<>(towns);
-		
-		//Distance[i] will return the shortest distance to townArray[i] after calling Dijkstra's Algorithm
-		int[] distance = new int[towns.size()];
+		distance = new int[towns.size()];
 
 		for (int i = 0; i < towns.size(); i++) {
 			distance[i] = Integer.MAX_VALUE; //Instantiate each element with maximum value to mark unvisited vertices
@@ -493,6 +501,25 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			edgeArray[j][i] = road.getWeight();
 		}
 		return;
+	}
+	
+	/**
+	 * After running Djikstra's algorithm, find the distance to a given destination
+	 * from the destination table 
+	 * @param destination
+	 * @return
+	 */
+	public int getDistance(Town destination) {
+		//find Town index in townArray
+		for (int i = 0; i < towns.size(); i++) {
+			if (towns.get(i).equals(destination)){
+				//When a match is found, return its distance from within the distance array
+				return distance[i];
+			}
+		}
+		
+		//If no match is found, return -1;
+		return -1;
 	}
 	
 
