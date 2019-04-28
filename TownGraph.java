@@ -39,7 +39,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	}
 
 	/**
-	 * Add a new Road to the graph
+	 * Add a new Road to the graph. Note: this does not permit adding of negative weights
 	 * 
 	 * @param sourceVertex the source Town for the Road
 	 * @param destinationVertex the destination Town for the Road
@@ -54,9 +54,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	@Override
 	public Road addEdge(Town sourceVertex, Town destinationVertex, int weight, String description) 
 			throws NullPointerException, IllegalArgumentException{
-		
-		//TODO: this shouldn't allow negative weights, probably
-		
+				
 		//If either argument Town is null, throw an exception
 		if (sourceVertex == null || destinationVertex == null) {
 			throw new NullPointerException();
@@ -68,7 +66,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		}
 		
 		//Otherwise, create a new Road object from the argument information
-		Road toAdd = new Road(sourceVertex, destinationVertex, weight, description);
+		Road toAdd = new Road(sourceVertex, destinationVertex, Math.abs(weight), description);
 		
 		//Add the Road to the graph
 		roads.add(toAdd);
@@ -385,8 +383,13 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			}
 			
 		}//end while
-			
+		
+		//TODO: remove this when done
+		for (int i = 0; i < townArray.length; i++) {
+			System.out.println("Distance to town_" + (i+1) + ": " + distance[i]);
+		}
 	}//end dijkstraShortestPath
+	
 	
 	/**
 	 * Get the next minimum edge from the adjacency matrix.
@@ -405,11 +408,9 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		//Iterate through the sourceIndex's adjacent edges
 		//Find the shortest edge to a vertex that isn't in the adjacency matrix
 		for (int i = 0; i < dist.length; i++) {
-			if (dist[i] != 0 && unadded.contains(townArray[i])) {
-				if (dist[i] <= minDistance) {
+			if (dist[i] < minDistance && unadded.contains(townArray[i])) {
 					minDistance = dist[i];
 					minIndex = i;
-				}
 			}
 		}
 		
@@ -469,7 +470,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			int j = -1;
 			found = false;
 			while (!found && i < townArray.length) {
-				i++;
+				j++;
 				if (road.getDestination().equals(townArray[j])) {
 					found = true;
 				}
@@ -477,7 +478,9 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			
 			//Once both source and destination are found, add the edge to the adjacency matrix
 			edgeArray[i][j] = road.getWeight();
+			edgeArray[j][i] = road.getWeight();
 		}
+		return;
 	}
 
 }
