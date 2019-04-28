@@ -264,7 +264,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	public boolean removeVertex(Town v) {
 		
 		//If the argument Town is not in the graph, return null
-		if (this.containsVertex(v)) return false;
+		if (!this.containsVertex(v)) return false;
 		
 		//Otherwise, proceed with removing the Town
 		//Create a set of the Roads connected to the Town
