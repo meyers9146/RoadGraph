@@ -39,12 +39,11 @@ public class Town implements Comparable<Town> {
 	/**
 	 * Compare this Town to another town.
 	 * @param o the Town to be compared
-	 * @return 0 if the two Towns are equal, and -1 otherwise
+	 * @return 0 if the two Towns are equal, and another number otherwise
 	 */
 	@Override
 	public int compareTo (Town o) {
-		if (this.name.equals(o.getName())) return 0;
-		else return -1;
+		return (this.name.compareTo(o.getName()));
 	}
 	
 	/**

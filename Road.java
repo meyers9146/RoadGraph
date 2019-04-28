@@ -61,12 +61,11 @@ public class Road implements Comparable<Road>{
 	
 	/**
 	 * Compare this Road to another Road
-	 * @return 0 if the two road names are equal, and -1 otherwise
+	 * @return 0 if the two road names are equal, and a positive or negative number otherwise
 	 */
 	public int compareTo(Road r) {
 		
-		if (this.name.equals(r.getName())) return 0;
-		else return -1;
+		return this.name.compareTo(r.getName());
 	}
 	
 	/**
