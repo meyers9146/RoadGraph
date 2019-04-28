@@ -240,13 +240,20 @@ public class TownGraphManager implements TownGraphManagerInterface{
 		try {
 			ArrayList<String> path = graph.shortestPath(new Town(town1), new Town(town2));
 			
-			//Append the word " miles" to each String to indicate unit of measure
+			//Because strings are immutable, create a returin list and append the word " miles" 
+			//to each String to indicate unit of measure
+			ArrayList<String> returnPath = new ArrayList<>();
 			for (String str : path) {
-				str = new String (str + " miles");
+				returnPath.add(new String (str + " miles"));
 			}
 			
-			return path;
+			//Finally, add a String for the total mileage
+			String str = String.format("Total miles: %d miles", graph.getDistance(new Town(town2)));
+			returnPath.add(str);
+			
+			return returnPath;
 		}
+		//If something goes wrong, return null
 		catch (Exception e) {
 			return null;
 		}
