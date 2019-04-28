@@ -11,6 +11,14 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	int[][] edgeArray;
 	
 	/**
+	 * Default constructor. Creates an empty graph with no content
+	 */
+	public TownGraph() {
+		towns = new ArrayList<>();
+		roads = new ArrayList<>();
+	}
+	
+	/**
 	 * Return a given Road from the graph. If the Road does not exist, returns null
 	 * 
 	 * @param sourceVertex the source Town for the Road
@@ -129,8 +137,10 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	public boolean containsVertex(Town v) {
 		
 		//Iterate through the Towns list. If a match is found, return true
-		for (Town town : towns) {
-			if (town.equals(v)) return true;
+		if (towns.size() > 0) {
+			for (Town town : towns) {
+				if (town.equals(v)) return true;
+			}
 		}
 		
 		//Return false if a match is not found
