@@ -157,12 +157,14 @@ public class TownGraphManager implements TownGraphManagerInterface{
 	 */
 	@Override
 	public boolean deleteRoadConnection(String town1, String town2, String road) {
-		
-		Road toDelete = new Road(new Town(town1), new Town(town2), road);
-		
+				
 		try {
-			graph.removeEdge(toDelete);
-			return true;
+			Road temp = graph.removeEdge(new Town(town1), new Town(town2), road);
+			
+			//removeEdge may return null if no removal was performed. If so, return false
+			if (temp == null) return false;
+			//If removal was successful, return true
+			else return true;
 		}
 		catch (Exception e) {
 			return false;
