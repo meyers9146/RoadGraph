@@ -27,7 +27,7 @@ public class Road implements Comparable<Road>{
 	}
 	
 	/**
-	 * Create an unweighted Road
+	 * Create an unweighted Road.
 	 * @param source this Road's source
 	 * @param destination this Road's destination 
 	 * @param name this Road's name
@@ -36,7 +36,7 @@ public class Road implements Comparable<Road>{
 		this.source = source;
 		this.destination = destination;
 		this.name = name;
-		weight = 0;
+		weight = 1;
 	}
 	
 	/**

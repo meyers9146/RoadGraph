@@ -4,8 +4,11 @@ import java.util.*;
 
 public class TownGraph implements GraphInterface<Town, Road> {
 
-	HashSet<Town> towns;
-	HashSet<Road> roads;
+	ArrayList<Town> towns;
+	ArrayList<Road> roads;
+	
+	Town[] townArray;
+	int[][] edgeArray;
 	
 	/**
 	 * Return a given Road from the graph. If the Road does not exist, returns null
@@ -43,6 +46,8 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	@Override
 	public Road addEdge(Town sourceVertex, Town destinationVertex, int weight, String description) 
 			throws NullPointerException, IllegalArgumentException{
+		
+		//TODO: this shouldn't allow negative weights, probably
 		
 		//If either argument Town is null, throw an exception
 		if (sourceVertex == null || destinationVertex == null) {
@@ -176,8 +181,8 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		//If the graph does not contain the edge, return null
 		if (!this.containsEdge(sourceVertex, destinationVertex)) return null;
 		
-		//If the indicated weight is 0, or if the description is null, return null
-		if (weight <= 0 || description == null) return null;
+		//If the indicated weight is 1, or if the description is null, return null
+		if (weight <= 1 || description == null) return null;
 		
 		//If all the above checks are good, remove the indicated Road
 		Road toRemove = new Road(sourceVertex, destinationVertex, weight, description);
@@ -231,7 +236,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		
 		//Call the appropriate removeEdge method depending on whether the Road is weighted
 		//or unweighted
-		if (weight == 0) {
+		if (weight <= 1) {
 			removeEdge(source, destination, weight, name);
 		}
 		else removeEdge(source, destination, name);
@@ -273,8 +278,62 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	}
 
 	@Override
-	public void dijkstraShortestPath(Town sourceVertex) {
-		// TODO Auto-generated method stub
+	public void dijkstraShortestPath(Town sourceVertex) { //TODO: this is hard
+		//Start by generating a new adjacency matrix
+		generateMatrix();
+		
+		//Generate sets to hold added and unadded Towns
+		HashSet<Town> added = new HashSet<>();
+		HashSet<Town> unadded = new HashSet<>(towns);
+		
+		//Create empty array for returning. Distance[i] will return the shortest distance to towns.get(i)
+		int[] distance = new int[towns.size()];
+		for (int i = 0; i < towns.size(); i++) {
+			distance[i] = Integer.MAX_VALUE; //Instantiate each element with maximum value to determine minimums
+		}
+		
+		//Set all Towns to unvisited and create counter for path length
+		for (Town town : towns) {
+			town.setVisited(false);
+			town.setLastTown(null);
+		}
+		int pathTraveled = 0;
+		
+		//Start with the first Town - mark visited and consider available edges
+
+		sourceVertex.setVisited(true);
+		
+		//Find sourceVertex's index in the adjacency matrix
+		int sourceIndex;
+		for (int i = 0; i < towns.size(); i++) {
+			if (sourceVertex.equals(towns.get(i))) {
+				sourceIndex = i;
+			}
+		}//end for
+			
+		//Set starting index's distance to zero in the distance array
+		distance[sourceIndex] = 0;
+		
+		while (unadded.size() != 0) {
+			//Find shortest edge
+			int minIndex = getNextMin(distance, added, unadded);
+			added.add(townArray[minIndex]);
+			unadded.remove(townArray[minIndex]);
+			
+		}//end while //TODO: come back here
+			
+			
+		
+		
+		
+	}//end dijkstraShortestPath
+	
+	private int getNextMin(int[] dist, HashSet<Town> added, HashSet<Town> unadded) {
+		if (unadded.isEmpty()) return -1; //Will throw NoSuchElementException if passed an empty unadded set
+		
+		
+		
+		
 		
 	}
 
@@ -286,7 +345,8 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	@Override
 	public Set<Road> edgeSet() {
 		
-		return roads;
+		//HashSet has a constructor that accepts any Collection object
+		return new HashSet<Road>(roads);
 	}
 
 	/**
@@ -297,7 +357,49 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	@Override
 	public Set<Town> vertexSet() {
 		
-		return towns;
+		//HashSet has a constructor that accepts any Collection object
+		return new HashSet<Town>(towns);
+	}
+	
+	/**
+	 * Generate an adjacency matrix of the current Towns and Edges to allow traversal of the graph.
+	 * The matrix consists of an X by X grid of integers, where X is the number of Towns in the graph.
+	 * A value of 0 in the graph indicates no edge, and any other value indicates an edge existing.
+	 * An unweighted graph will populate with 1's, and a weighted graph will populate with the weight
+	 * of the edges.
+	 */
+	private void generateMatrix() {
+		//Create an array of the Town objects and corresponding 2D array for the edges
+		townArray = towns.toArray(new Town[towns.size()]);
+		edgeArray = new int[townArray.length][townArray.length];
+		
+		for (Road road : roads) {
+			//Search the townArray to find the source vertex
+			int i = -1;
+			boolean found = false;
+			while (!found && i < townArray.length) {
+				i++;
+				if (road.getSource().equals(townArray[i])) {
+					found = true;
+				}
+			}
+			
+			//Once source is found, search the townArray again to find the destination vertex
+			int j = -1;
+			found = false;
+			while (!found && i < townArray.length) {
+				i++;
+				if (road.getDestination().equals(townArray[j])) {
+					found = true;
+				}
+			}
+			
+			//Once both source and destination are found, add the edge to the adjacency matrix
+			edgeArray[i][j] = road.getWeight();
+		}
+	}
+		
+		
 	}
 
 	
