@@ -271,10 +271,46 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		return true;
 	}
 
+	/**
+	 * Find the shortest path from a source to a destination
+	 * 
+	 * @param sourceVertex the starting Town
+	 * @param destination Vertex the destination Town
+	 * 
+	 * @return an ArrayList of strings describing the path from source to destination
+	 */
 	@Override
-	public ArrayList<String> shortestPath(Town sourceVertex, Town destinationVertex) {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<String> shortestPath(Town sourceVertex, Town destinationVertex) {		
+		//TODO: should I make a PathDoesNotExistException?
+		
+		//Call DSP algorithm to generate the tree
+		this.dijkstraShortestPath(sourceVertex);
+		
+		//Start from destination vertex and work backward to build the path
+		ArrayList<Town> backtrace = new ArrayList<>();
+		backtrace.add(destinationVertex);
+		
+		Town previous = destinationVertex.getLastTown();
+		
+		while (previous != null) {
+			backtrace.add(previous);
+			previous = previous.getLastTown();
+		}
+		
+		//The backtrace list is in reverse order. Convert the list to Strings from back-to-front,
+		//including the edges between them
+		ArrayList<String> path = new ArrayList<>();
+		for (int i = backtrace.size()-1; i == 0; i--) {
+			path.add(backtrace.get(i).toString());
+			
+			//For all Towns except the first, add in "via [Road] to" String
+			if (backtrace.get(i).getLastTown() != null) {
+				path.add(" via " + getEdge(backtrace.get(i), backtrace.get(i).getLastTown()).toString() + " to ");
+			}
+		}
+		
+		//When the source is reached, return the completed path
+		return path;
 	}
 
 	@Override
