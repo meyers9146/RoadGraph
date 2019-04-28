@@ -102,6 +102,21 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		//Return false if there is a problem adding the Town
 		return false;
 	}
+	
+	/**
+	 * Retieve a particular Town from this graph
+	 * @param v the Town to be searched for
+	 * @return the Town in this graph once found, or null if not present
+	 */
+	public Town getVertex(Town v) {
+		
+		for (Town town : towns) {
+			if (town.equals(v)) return town;
+		}
+		
+		//If no match is found, return null
+		return null;
+	}
 
 	/**
 	 * Check to see if there is a Road connecting two given Towns
@@ -287,8 +302,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	 * @return an ArrayList of strings describing the path from source to destination
 	 */
 	@Override
-	public ArrayList<String> shortestPath(Town sourceVertex, Town destinationVertex) {		
-		//TODO: should I make a PathDoesNotExistException?
+	public ArrayList<String> shortestPath(Town sourceVertex, Town destinationVertex){		
 		
 		//Call DSP algorithm to generate the tree
 		this.dijkstraShortestPath(sourceVertex);
@@ -327,7 +341,6 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	 * Use Dijkstra's Shortest Path algorithm to determine the shortest paths from a given source Town to any other Town in the graph
 	 * @param sourceVertex the starting Town for the algorithm
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void dijkstraShortestPath(Town sourceVertex) {
 		//Start by generating a new adjacency matrix
@@ -481,5 +494,6 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		}
 		return;
 	}
+	
 
 }
