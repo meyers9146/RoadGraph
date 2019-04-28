@@ -283,13 +283,13 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		generateMatrix();
 		
 		//Generate sets to hold added and unadded Towns
-		HashSet<Town> added = new HashSet<>();
-		HashSet<Town> unadded = new HashSet<>(towns);
+		ArrayList<Town> added = new ArrayList<>();
+		ArrayList<Town> unadded = new ArrayList<>(towns);
 		
 		//Create empty array for returning. Distance[i] will return the shortest distance to towns.get(i)
 		int[] distance = new int[towns.size()];
 		for (int i = 0; i < towns.size(); i++) {
-			distance[i] = Integer.MAX_VALUE; //Instantiate each element with maximum value to determine minimums
+			distance[i] = Integer.MAX_VALUE; //Instantiate each element with maximum value to mark unvisited vertices
 		}
 		
 		//Set all Towns to unvisited and create counter for path length
@@ -297,14 +297,9 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			town.setVisited(false);
 			town.setLastTown(null);
 		}
-		int pathTraveled = 0;
-		
-		//Start with the first Town - mark visited and consider available edges
-
-		sourceVertex.setVisited(true);
 		
 		//Find sourceVertex's index in the adjacency matrix
-		int sourceIndex;
+		int sourceIndex = -1;
 		for (int i = 0; i < towns.size(); i++) {
 			if (sourceVertex.equals(towns.get(i))) {
 				sourceIndex = i;
@@ -314,26 +309,66 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		//Set starting index's distance to zero in the distance array
 		distance[sourceIndex] = 0;
 		
-		while (unadded.size() != 0) {
+		//Set a variable to recall the last-searched Town. The source Town will point back to null
+		Town nextPrior = null;
+		
+		for (int i = 0; i < townArray.length-1; i++) {
+			
 			//Find shortest edge
-			int minIndex = getNextMin(distance, added, unadded);
+			int minIndex = getNextMin(distance, unadded);
 			added.add(townArray[minIndex]);
 			unadded.remove(townArray[minIndex]);
 			
-		}//end while //TODO: come back here
+			//TODO: I bet this part doesn't work right
+			towns.get(minIndex).setLastTown(nextPrior); //set the prior town in the sequence
+			nextPrior = towns.get(minIndex); //set this town as the prior town for the next iteration
 			
+			//Update distance array to reflect the added edge
+			//If the distance array's value is still equal to MAX_VALUE, it will be updated
+			//Otherwise, if this vertex's distance is less than the distance to the existing edge from source,
+			//it will be updated
+			// (note: this checks for existing edges before updating, so edges of 0 will not be overwritten)
+			for (int j = 0; j < townArray.length; j++) {
+				if (unadded.contains(townArray[j]) && edgeArray[minIndex][j] != Integer.MAX_VALUE) {
+					if (edgeArray[minIndex][j] != 0) {
+						if (distance[minIndex] + edgeArray[minIndex][j] < distance[j]) {
+							distance[j] = distance[minIndex] + edgeArray[minIndex][j];
+						}
+					}
+				}
+			}
 			
-		
-		
-		
+		}//end while
+			
 	}//end dijkstraShortestPath
 	
-	private int getNextMin(int[] dist, HashSet<Town> added, HashSet<Town> unadded) {
+	/**
+	 * Get the next minimum edge from the adjacency matrix.
+	 * Looks across edges of 
+	 * @param dist
+	 * @param unadded
+	 * @param sourceIndex
+	 * @return
+	 */
+	private int getNextMin(int[] dist, ArrayList<Town> unadded) {
 		if (unadded.isEmpty()) return -1; //Will throw NoSuchElementException if passed an empty unadded set
 		
+		int minDistance = Integer.MAX_VALUE;
+		int minIndex = -1;
 		
+		//Iterate through the sourceIndex's adjacent edges
+		//Find the shortest edge to a vertex that isn't in the adjacency matrix
+		for (int i = 0; i < dist.length; i++) {
+			if (dist[i] != 0 && unadded.contains(townArray[i])) {
+				if (dist[i] <= minDistance) {
+					minDistance = dist[i];
+					minIndex = i;
+				}
+			}
+		}
 		
-		
+		//Return the index of the edge that was located
+		return minIndex;
 		
 	}
 
@@ -398,9 +433,5 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			edgeArray[i][j] = road.getWeight();
 		}
 	}
-		
-		
-	}
 
-	
 }
