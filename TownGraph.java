@@ -1,4 +1,3 @@
-import java.io.File;
 import java.util.*;
 
 
@@ -305,24 +304,32 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			previous = previous.getLastTown();
 		}
 		
-		//The backtrace list is in reverse order. Convert the list to Strings from back-to-front,
-		//including the edges between them
+		//Create a path and add message strings
 		ArrayList<String> path = new ArrayList<>();
-		for (int i = backtrace.size()-1; i == 0; i--) {
-			path.add(backtrace.get(i).toString());
+		for (int i = 0; i < backtrace.size() - 1; i++) {
 			
-			//For all Towns except the first, add in "via [Road] to" String
-			if (backtrace.get(i).getLastTown() != null) {
-				path.add(" via " + getEdge(backtrace.get(i), backtrace.get(i).getLastTown()).toString() + " to ");
-			}
+			//For each vertex, add a String with the following format:
+			// "[Source Town name] via [Road name] to [Destination Town name] [weight]"
+			path.add(backtrace.get(i).getLastTown().toString() + " via " + getEdge(backtrace.get(i), backtrace.get(i).getLastTown())
+					+ " to " + backtrace.get(i).toString() + " " 
+					+ getEdge(backtrace.get(i), backtrace.get(i).getLastTown()).getWeight());
+
 		}
+		
+		//Reverse path, since backtrace searched Towns by reverse order
+		Collections.reverse(path);
 		
 		//When the source is reached, return the completed path
 		return path;
 	}
 
+	/**
+	 * Use Dijkstra's Shortest Path algorithm to determine the shortest paths from a given source Town to any other Town in the graph
+	 * @param sourceVertex the starting Town for the algorithm
+	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public void dijkstraShortestPath(Town sourceVertex) { //TODO: this is hard
+	public void dijkstraShortestPath(Town sourceVertex) {
 		//Start by generating a new adjacency matrix
 		generateMatrix();
 		
@@ -330,15 +337,15 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		ArrayList<Town> added = new ArrayList<>();
 		ArrayList<Town> unadded = new ArrayList<>(towns);
 		
-		//Create empty array for returning. Distance[i] will return the shortest distance to towns.get(i)
+		//Distance[i] will return the shortest distance to townArray[i] after calling Dijkstra's Algorithm
 		int[] distance = new int[towns.size()];
+
 		for (int i = 0; i < towns.size(); i++) {
 			distance[i] = Integer.MAX_VALUE; //Instantiate each element with maximum value to mark unvisited vertices
 		}
 		
-		//Set all Towns to unvisited and create counter for path length
+		//Create counter for path length
 		for (Town town : towns) {
-			town.setVisited(false);
 			town.setLastTown(null);
 		}
 		
@@ -348,13 +355,10 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			if (sourceVertex.equals(towns.get(i))) {
 				sourceIndex = i;
 			}
-		}//end for
+		}
 			
 		//Set starting index's distance to zero in the distance array
 		distance[sourceIndex] = 0;
-		
-		//Set a variable to recall the last-searched Town. The source Town will point back to null
-		Town nextPrior = null;
 		
 		for (int i = 0; i < townArray.length-1; i++) {
 			
@@ -362,10 +366,6 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			int minIndex = getNextMin(distance, unadded);
 			added.add(townArray[minIndex]);
 			unadded.remove(townArray[minIndex]);
-			
-			//TODO: I bet this part doesn't work right
-			towns.get(minIndex).setLastTown(nextPrior); //set the prior town in the sequence
-			nextPrior = towns.get(minIndex); //set this town as the prior town for the next iteration
 			
 			//Update distance array to reflect the added edge
 			//If the distance array's value is still equal to MAX_VALUE, it will be updated
@@ -377,6 +377,9 @@ public class TownGraph implements GraphInterface<Town, Road> {
 					if (edgeArray[minIndex][j] != 0) {
 						if (distance[minIndex] + edgeArray[minIndex][j] < distance[j]) {
 							distance[j] = distance[minIndex] + edgeArray[minIndex][j];
+							
+							//Set the Town's precedessor
+							townArray[j].setLastTown(townArray[minIndex]);
 						}
 					}
 				}
@@ -384,10 +387,6 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			
 		}//end while
 		
-		//TODO: remove this when done
-		for (int i = 0; i < townArray.length; i++) {
-			System.out.println("Distance to town_" + (i+1) + ": " + distance[i]);
-		}
 	}//end dijkstraShortestPath
 	
 	

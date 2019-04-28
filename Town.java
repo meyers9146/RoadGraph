@@ -12,7 +12,6 @@ public class Town implements Comparable<Town> {
 	
 	private String name;
 	private ArrayList<Town> adjacentTowns;
-	private boolean visited;
 	private Town lastTown;
 	
 	/**
@@ -102,22 +101,6 @@ public class Town implements Comparable<Town> {
 	 */
 	public ArrayList<Town> getAdjacentTowns() {
 		return adjacentTowns;
-	}
-
-	/**
-	 * Check if this Town has been visited in a traversal
-	 * @return true if this Town has been visited, false otherwise
-	 */
-	public boolean isVisited() {
-		return visited;
-	}
-
-	/**
-	 * Mark or unmark this Town as visited during traversal
-	 * @param visited to mark whether this Town has been visited
-	 */
-	public void setVisited(boolean visited) {
-		this.visited = visited;
 	}
 
 	/**
