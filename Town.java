@@ -88,7 +88,7 @@ public class Town implements Comparable<Town> {
 
 	/**
 	 * Set this Town's name
-	 * @param name
+	 * @param name the intended name for the Town
 	 */
 	public void setName(String name) {
 		this.name = name;

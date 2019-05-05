@@ -1,6 +1,11 @@
 import java.util.*;
 
-
+/**
+ * A class for creating a graph of towns and roads, including mileage for the road lengths
+ * @author Mike Meyers
+ * @version 1.0
+ *
+ */
 public class TownGraph implements GraphInterface<Town, Road> {
 
 	ArrayList<Town> towns;
@@ -36,7 +41,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		//Iterate through the list of Roads. If a road is found that matches the input, it is returned
 		//Otherwise, it returns false
 		for (Road road : roads) {
-			if (road.equals(new Road(sourceVertex, destinationVertex, "name"))) return road;
+			if (road.equals(new Road(sourceVertex, destinationVertex, ""))) return road;
 		}
 		return null;
 	}
@@ -52,7 +57,8 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	 * @return the added Road
 	 * 
 	 * @throws NullPointerException if passed a null Town
-	 * @throws IllegalArgumentException if passed a Town that does not exist in the graph
+	 * @throws IllegalArgumentException if passed a Town that does not exist in the graph,
+	 * 									or if the source and destnation are the same
 	 */
 	@Override
 	public Road addEdge(Town sourceVertex, Town destinationVertex, int weight, String description) 
@@ -63,10 +69,19 @@ public class TownGraph implements GraphInterface<Town, Road> {
 			throw new NullPointerException();
 		}
 		
+		//If the source and destination are the same, throw an exception
+		else if (sourceVertex.equals(destinationVertex)) {
+			throw new IllegalArgumentException("Source and Destination may not be the same");
+		}
+		
 		//If the graph does not contain the argument Towns, throw an exception
 		else if (!(this.containsVertex(sourceVertex) && this.containsVertex(destinationVertex))) {
 			throw new IllegalArgumentException("The indicated Towns are not in the graph.");
 		}
+		
+		//If the road already exists, return null
+		if (this.containsEdge(sourceVertex, destinationVertex)) throw new IllegalArgumentException(
+				"The indicated road " + description + " already exists.");
 		
 		//Otherwise, create a new Road object from the argument information
 		Road toAdd = new Road(sourceVertex, destinationVertex, Math.abs(weight), description);
@@ -175,6 +190,8 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	public Set<Road> edgesOf(Town vertex) {
 		Set<Road> edgeSet = new HashSet<>();
 		
+		if (!this.containsVertex(vertex)) return null;
+		
 		//Iterate through the Roads set.
 		//Any Road found that contains the town is an adjacent Road,
 		//And is added to the return Set
@@ -186,12 +203,13 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	}
 
 	/**
-	 * Remove a Road, as specified by the Road's parameters.
+	 * Remove a Road, as specified by the Road's parameters. Will not remove edges of weight
+	 * equal to or less than 1, per the interface
 	 * 
 	 * @param sourceVertex the source Town for the Road
 	 * @param destinationVertex the destination Town for the Road
 	 * @param weight the weight for the Road
-	 * @description the name of the Road
+	 * @param description the name of the Road
 	 * 
 	 * @return the Road that was removed, or null otherwise
 	 */
@@ -223,7 +241,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	 * 
 	 * @param sourceVertex the source Town for the Road
 	 * @param destinationVertex the destination Town for the Road
-	 * @description the name of the Road
+	 * @param description the name of the Road
 	 * 
 	 * @return the Road that was removed, or null otherwise
 	 */
@@ -301,7 +319,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	 * Find the shortest path from a source to a destination
 	 * 
 	 * @param sourceVertex the starting Town
-	 * @param destination Vertex the destination Town
+	 * @param destinationVertex the destination Town
 	 * 
 	 * @return an ArrayList of strings describing the path from source to destination
 	 */
@@ -313,7 +331,6 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		
 		//Start from destination vertex and work backward to build the path
 		ArrayList<Town> backtrace = new ArrayList<>();
-		//backtrace.add(destinationVertex); TODO: delete if this works
 		
 		//Replace the argument destinationVertex with the actual one from the graph
 		//and add the destination to the graph
@@ -356,7 +373,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 		//Start by generating a new adjacency matrix
 		generateMatrix();
 		
-		//Generate sets to hold added and unadded Towns
+		//Generate lists to hold added and unadded Towns
 		ArrayList<Town> added = new ArrayList<>();
 		ArrayList<Town> unadded = new ArrayList<>(towns);
 		distance = new int[towns.size()];
@@ -399,7 +416,7 @@ public class TownGraph implements GraphInterface<Town, Road> {
 						if (distance[minIndex] + edgeArray[minIndex][j] < distance[j]) {
 							distance[j] = distance[minIndex] + edgeArray[minIndex][j];
 							
-							//Set the Town's precedessor
+							//Set the Town's predecessor
 							townArray[j].setLastTown(townArray[minIndex]);
 						}
 					}
@@ -413,11 +430,11 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	
 	/**
 	 * Get the next minimum edge from the adjacency matrix.
-	 * Looks across edges of 
-	 * @param dist
-	 * @param unadded
-	 * @param sourceIndex
-	 * @return
+	 *
+	 * @param dist the distance array from the graph
+	 * @param unadded the list of Towns not yet added to the MST
+	 * 
+	 * @return the integer of the index of the next closest Town
 	 */
 	private int getNextMin(int[] dist, ArrayList<Town> unadded) {
 		if (unadded.isEmpty()) return -1; //Will throw NoSuchElementException if passed an empty unadded set
@@ -506,8 +523,8 @@ public class TownGraph implements GraphInterface<Town, Road> {
 	/**
 	 * After running Djikstra's algorithm, find the distance to a given destination
 	 * from the destination table 
-	 * @param destination
-	 * @return
+	 * @param destination the destination Town
+	 * @return the distance from the source to the destination
 	 */
 	public int getDistance(Town destination) {
 		//find Town index in townArray

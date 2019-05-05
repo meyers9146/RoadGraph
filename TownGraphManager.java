@@ -1,8 +1,16 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Scanner;
 import java.util.TreeSet;
 
+/**
+ * A Manager class for creating and populating a Town Graph object.
+ * @author Mike Meyers
+ * @version 1.0
+ *
+ */
 public class TownGraphManager implements TownGraphManagerInterface{
 
 	private TownGraph graph = new TownGraph();
@@ -33,7 +41,8 @@ public class TownGraphManager implements TownGraphManagerInterface{
 		
 			return true;
 		}
-		//If something goes wrong, return false (such as if the Towns aren't in the graph)
+		//If something goes wrong, return false (such as if the Towns aren't in the graph
+		//										or if the Road already exists)
 		catch (Exception e) {
 			return false;
 		}
@@ -63,8 +72,7 @@ public class TownGraphManager implements TownGraphManagerInterface{
 	public boolean addTown(String v) {
 		
 		try {
-			graph.addVertex(new Town(v));
-			return true;
+			return graph.addVertex(new Town(v));
 		}
 			catch (Exception e) {
 			return false;
@@ -125,7 +133,7 @@ public class TownGraphManager implements TownGraphManagerInterface{
 	/**
 	 * Get a sorted list of all Roads in the graph
 	 * 
-	 * @return a sorted ArrayList<String> of all Roads in the graph
+	 * @return a sorted ArrayList of all Roads in the graph
 	 */
 	@Override
 	public ArrayList<String> allRoads() {
@@ -191,9 +199,9 @@ public class TownGraphManager implements TownGraphManagerInterface{
 	}
 
 	/**
-	 * Generate an ArrayList<String> of all towns in the graph in alphabetical order
+	 * Generate an ArrayList of all towns in the graph in alphabetical order
 	 * 
-	 * @return an ArrayList<String> of all towns in the graph in alphabetical order
+	 * @return an ArrayList of all towns in the graph in alphabetical order
 	 */
 	@Override
 	public ArrayList<String> allTowns() {
@@ -240,7 +248,10 @@ public class TownGraphManager implements TownGraphManagerInterface{
 		try {
 			ArrayList<String> path = graph.shortestPath(new Town(town1), new Town(town2));
 			
-			//Because strings are immutable, create a returin list and append the word " miles" 
+			//If the distance is the maximum integer, no path exists and method terminates
+			if (graph.getDistance(new Town(town2)) == Integer.MAX_VALUE) return null;
+			
+			//Because strings are immutable, create a return list and append the word " miles" 
 			//to each String to indicate unit of measure
 			ArrayList<String> returnPath = new ArrayList<>();
 			for (String str : path) {
@@ -257,6 +268,49 @@ public class TownGraphManager implements TownGraphManagerInterface{
 		catch (Exception e) {
 			return null;
 		}
+	}
+	
+	/**
+	 * Create a town graph from an indicated file.
+	 * Each line should be its own road list, in the format of
+	 * [Road name],[Distance];[Source Town Name];[Destination Town Name]
+	 * @param file the file used for populating the town graph
+	 * @throws FileNotFoundException if the file is not found
+	 * @throws IOException if there is a problem in the file that is read
+	 */
+	public void populateTownGraph(File file) throws FileNotFoundException, IOException{
+		
+		@SuppressWarnings("resource") //Gets closed following while loop but Eclipse won't catch it
+		Scanner scan = new Scanner(file); //Will throw FileNotFoundException if file is not found
+		
+		String[] line;
+		
+		while (scan.hasNextLine()) {
+			
+			//Convert each line into tokens
+			String toAdd = scan.nextLine().replaceAll(",", ";");
+			line = toAdd.split(";");
+			
+			//Check that the line is of the proper length. If not, throw Exception
+			if (line.length != 4) throw new IOException("Input file is improperly formatted");
+			
+			//Add Towns to the graph. Should be tokens 3 and 4 in each line 
+			this.addTown(line[2]);
+			this.addTown(line[3]);
+			
+			//Add Roads to the graph. Throw an Exception if improperly formatted
+			try {
+				this.addRoad(line[2], line[3], new Integer(line[1]), line[0]);
+			}
+			//ClassCastException will be thrown if the second item is not an Integer
+			catch (ClassCastException e) {
+				
+				throw new IOException ("Input file is improperly formatted");
+			}
+		}
+		
+		//At end of file, close Scanner
+		scan.close();
 	}
 
 }

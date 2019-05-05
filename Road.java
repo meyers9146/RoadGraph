@@ -52,7 +52,7 @@ public class Road implements Comparable<Road>{
 	
 	/**
 	 * Generate a String representing this Road
-	 * @returns a String representing this Road
+	 * @return a String representing this Road
 	 */
 	@Override
 	public String toString() {
